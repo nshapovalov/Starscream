@@ -113,7 +113,7 @@ public class NativeEngine: NSObject, Engine, URLSessionDataDelegate, URLSessionW
         broadcast(event: .error(error))
     }
     
-    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
         for metric in metrics.transactionMetrics {
             print(metric)
             let time = Date()
