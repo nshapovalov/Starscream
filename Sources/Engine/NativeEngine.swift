@@ -32,7 +32,7 @@ public class NativeEngine: NSObject, Engine, URLSessionDataDelegate, URLSessionW
     }
 
     public func start(request: URLRequest) {
-        let session = URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: self, delegateQueue: nil)
+        let session = URLSession(configuration: URLSessionConfiguration.default, delegate: self, delegateQueue: nil)
         task = session.webSocketTask(with: request)
         doRead()
         task?.resume()
@@ -111,5 +111,30 @@ public class NativeEngine: NSObject, Engine, URLSessionDataDelegate, URLSessionW
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         broadcast(event: .error(error))
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+        for metric in metrics.transactionMetrics {
+            print(metric)
+            let time = Date()
+            let fetchDate = metric.fetchStartDate
+            let domainLookupStartDate = metric.domainLookupStartDate
+            let domainLookupEndDate = metric.domainLookupEndDate
+            let connectStartDate = metric.connectStartDate
+            let connectEndDate = metric.connectEndDate
+            let requestStartDate = metric.requestStartDate
+            let requestEndDate = metric.requestEndDate
+            let responseStartDate = metric.responseStartDate
+            let responseEndDate = metric.responseEndDate
+            
+            print("Time: \(CFAbsoluteTimeGetCurrent()): request \(String(describing: task.originalRequest))")
+            print("Time: fetchTime: \(domainLookupStartDate?.timeIntervalSince(fetchDate ?? time) ?? 0)")
+            print("Time: domainLookupTime: \(domainLookupEndDate?.timeIntervalSince(domainLookupStartDate ?? time) ?? 0)")
+            print("Time: connectTime: \(connectEndDate?.timeIntervalSince(connectStartDate ?? time) ?? 0)")
+            print("Time: requestTime: \(requestEndDate?.timeIntervalSince(requestStartDate ?? time) ?? 0)")
+            print("Time: HTTPTime: \(responseStartDate?.timeIntervalSince(requestEndDate ?? time) ?? 0)")
+            print("Time: responseTime: \(responseEndDate?.timeIntervalSince(responseStartDate ?? time) ?? 0)")
+            print("Time: Total: \(responseEndDate?.timeIntervalSince(fetchDate ?? time) ?? 0)")
+        }
     }
 }
